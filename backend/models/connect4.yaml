@@ -1,0 +1,55 @@
+---
+env: Connect4
+#env: TicTacToe
+
+agent_config:
+  agent1:
+    agent: AlphaZero
+    augment_input: true
+    batch_size: 64
+    c: 1.41
+    dirichlet_noise: 0.03
+    epochs: 25
+    epsilon: 0.1
+    dropout: 0.3
+    input_width: 7
+    input_height: 6
+    lr: 0.001
+    max_mem_size: 20000
+    mcts_policy_opt: false
+    momentum: 0.9
+    n_sim: 25
+    network_path: ""
+    network_type: "cnn"
+    num_channels: 64
+    output_size: 7
+    optimizer: Adam
+    player: 1
+    minimax_lookup_path: # For minimax loss
+    state_lookup_path: # For minimax loss
+    t_threshold: 20
+    weight_decay: 0
+
+  agent2:
+    agent: Connect4MinMax
+    player: 2
+    type: "alphabeta_depth"
+    depth: 2
+    n_sims: 5
+
+exp_config: # experiment config
+  episodes: 300
+  exp_name: alphago_connect4
+  logger_type: tensorboard # what source to use for logging experiments.
+  neptune_api_token:
+  neptune_name: neptune_username/sandbox
+  plot_data: false
+  record_all: true
+  record_every: 20 # how often to record info
+  run_minimax_eval: false
+  eval_iters: 3 # number of games to player during evaluation
+  eval_threshold: 1
+  render: true
+  run_evaluator: false
+  save_model: true
+  train_iters: 50 # number of games to play during each episode
