@@ -23,9 +23,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      game: "tictactoe",
+      game: "connect4",
       player: "1",
-      agent: "minimax"
+      agent: "alphago"
     };
 
     this.setAgent = this.setAgent.bind(this);

@@ -63,6 +63,12 @@ def alpha_opinion():
 
     action , p_a = agent.act(board)
 
+
+    print("Returjing from alpha optinion")
+    print(p.tolist())
+    print(value_board)
+    print(p_a)
+
     return {"p":p.tolist(), "v": value_board, "mcts_p":p_a.tolist()}
 
 @app.route("/is_win",methods=["Post","Get"])
@@ -74,7 +80,9 @@ def is_win():
     board = json_to_board(board)
     board = board.reshape(env.board.shape)
     win = env.is_win(board)
-    return {"win":win} ,201
+    if win:
+        print("Is WIN")
+    return {"win":int(win)} ,201
 
 @app.route("/make_move",methods=["Post","Get"])
 def make_move():
@@ -95,12 +103,20 @@ def make_move():
 
     env = ENV[env_name]
 
+    if env_name == "connect4":
+        board = board.reshape(env.board.shape)
+        action = board_index_to_col(action)
+
     env.board = board
 
     next_board = env.next_state(board,action)
     if env.is_win(next_board):
-        next_board = board_to_json(next_board)
-        return {"board": next_board, "winner": env.is_win(next_board)}, 201
+        winner = env.check_winner(next_board)
+        next_board = board_to_json(next_board.flatten())
+        print("IS WIN Retuing win info")
+        print(type(next_board))
+        print(type(winner))
+        return {"board": next_board, "winner":int(winner)}, 201
 
     if agent_type == "alphago":
         agent.reset()
@@ -109,20 +125,19 @@ def make_move():
     print("Make Move")
     print(board)
     print(next_board)
+    print(agent_type)
     env.current_player = env.check_turn(next_board)
     env.board = next_board
     a = agent.act(next_board)
     if type(a) == tuple:
         a,p_a = a
 
-
-
     print("Action")
     print(a)
     print(type(env))
     curr_state, action, next_s, winner = env.step(a)
 
-    next_board = board_to_json(next_s)
+    next_board = board_to_json(next_s.flatten())
 
     return {"board": next_board, "winner":winner} , 201
 
@@ -203,6 +218,7 @@ def json_to_board(board):
             board[idx] = 0
 
     return np.array(board)
+
 
 def create_json_tree(agent,node):
     """

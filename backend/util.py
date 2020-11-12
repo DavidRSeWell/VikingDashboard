@@ -48,7 +48,10 @@ def load_all(dir):
             elif agent_name == "mcts":
                 agents[game][agent_name] = agent(env,player=2)
             else:
-                agents[game][agent_name] = agent(env,player=2,type=agent_name)
+                if game == "connect4":
+                    agents[game][agent_name] = agent(env,player=2,type="alphabeta",depth=1,n_sims=1)
+                else:
+                    agents[game][agent_name] = agent(env,player=2,type="alphabeta")
 
     return AGENTS,ENVS
 

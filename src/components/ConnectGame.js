@@ -76,6 +76,8 @@ class Game extends React.Component {
 
   constructor(props) {
     super(props);
+    console.log("Constructor!!!")
+    console.log(props.agent);
     this.state = {
       board_height: this.props.board_height,
       board_width: this.props.board_width,
@@ -84,9 +86,9 @@ class Game extends React.Component {
       history: [{squares: Array(props.board_height * props.board_width).fill(null)}],
       stepNumber: 0,
       xIsNext: true,
-      player: props.player,
+      player: this.props.player,
       playAgent: true,
-      agent: props.agent,
+      agent: this.props.agent,
       game: this.props.game,
       board_probs: Array(props.action_size).fill(0),
       board_values: Array(props.action_size).fill(0),
@@ -95,6 +97,8 @@ class Game extends React.Component {
     };
 
     this.calculateWinner = this.calculateWinner.bind(this);
+    this.getNextState = this.getNextState.bind(this);
+    this.handleClick = this.handleClick.bind(this);
     this.resetGame = this.resetGame.bind(this);
 
   }
@@ -104,6 +108,8 @@ class Game extends React.Component {
     // Reset any parts of state that are tied to that user.
     // In this simple example, that's just the email.
     if (props.game !== state.game) {
+
+      console.log(props.agent);
       return {
         game: props.game,
         board_height: props.board_height,
@@ -171,7 +177,7 @@ class Game extends React.Component {
         action: action, env_name: this.state.game,
         board: board
       })
-    });
+    })
 
     const data = await response.json();
 
@@ -181,9 +187,48 @@ class Game extends React.Component {
         board: data["board"]
       })
 
-      console.log(this.state.board)
-      this.calculateWinner(this.state.board)
-      this.getAlphaOpinion(this.state.board);
+      if (this.state.playAgent) {
+
+        const agent = this.props.agent;
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1];
+        const current_squares = current.squares.slice();
+        const env_name = this.state.game;
+
+        console.log("Agent Make Move!!!!!")
+        console.log(`agent type = ${agent}`)
+        // Now call
+        const response2 = await fetch("/make_move", {
+          method: 'POST',
+          headers: {
+                 'Content-Type': 'application/json'
+                 },
+          body: JSON.stringify({action: action, agent: agent, board: current_squares, player: 1, env_name: env_name})
+        });
+
+        const data = await response2.json()
+
+        if (response2.ok) {
+
+          console.log("Made move");
+          const history = this.state.history.slice(0, this.state.stepNumber + 1);
+
+          this.setState({
+            history: history.concat([{
+              squares: data.board,
+            }]),
+            board: data.board,
+            stepNumber: history.length,
+            xIsNext: !this.state.xIsNext
+          })
+
+          this.calculateWinner(this.state.board)
+        }
+      }else{
+        this.calculateWinner(this.state.board)
+      }
+
+
 
     }
   }
@@ -204,18 +249,15 @@ class Game extends React.Component {
       this.setState({
         winner: data["win"]
       })
+
+      this.getAlphaOpinion(this.state.board);
+
     }
 
 
   }
 
   async handleClick(i) {
-    const agent = this.state.agent;
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const current_squares = current.squares.slice();
-    const env_name = this.state.game;
-    const squares = current.squares.slice();
 
     if (this.state.winner !== 0) {
       return;
@@ -226,36 +268,6 @@ class Game extends React.Component {
     this.getNextState(this.state.board, i);
     console.log("New state")
     console.log(this.state.board);
-
-    if (this.state.playAgent) {
-
-      console.log("Agent Make Move!!!!!")
-      // Now call
-      const response = await fetch("/make_move", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({action: i, agent: agent, board: current_squares, player: 1, env_name: env_name})
-      });
-
-      const data = await response.json()
-
-      if (response.ok) {
-        this.setState({
-          history: history.concat([{
-            squares: data.board,
-          }]),
-          board: data.baord,
-          stepNumber: history.length,
-          xIsNext: !this.state.xIsNext
-        })
-
-        this.calculateWinner(this.state.board)
-        this.getAlphaOpinion(this.state.board);
-      }
-    }
-
 
   }
 
@@ -283,9 +295,11 @@ class Game extends React.Component {
         xIsNext: true,
         winner: 0
       });
+
+      this.getAlphaOpinion(this.state.board);
+
     }
 
-    this.getAlphaOpinion(this.state.board);
   }
 
   render() {
