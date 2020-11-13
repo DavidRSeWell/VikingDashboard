@@ -65,12 +65,6 @@ class App extends React.Component {
                   <option value="2">p2</option>
                 </Form.Control>
               </Col>
-              <Col>
-                <Form.Control size={"md"} as="select" value={this.state.agent} onChange={this.setAgent}>
-                  <option value="alphago">alphago</option>
-                  <option value="minimax">minimax</option>
-                </Form.Control>
-              </Col>
             </Form.Row>
           </Form.Group>
         </Navbar>

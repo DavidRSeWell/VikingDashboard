@@ -31,7 +31,7 @@ def alpha_opinion():
     agent = AGENTS[env_name]["alphago"]
     action_size = env.action_size
     board = board.reshape((env.board.shape))
-
+    print(env_name)
     print(board)
 
     board_t = agent.transform_state(board)
@@ -60,7 +60,10 @@ def alpha_opinion():
 
     # Get prob distribution for move
     agent.reset()
-
+    agent.train()
+    print("baord")
+    print(board)
+    print(type(board))
     action , p_a = agent.act(board)
 
 
@@ -89,13 +92,9 @@ def make_move():
 
     move_data = request.get_json()
 
-    action = move_data["action"]
-
     board = json_to_board(move_data["board"])
 
     env_name = move_data["env_name"]
-
-    player = move_data["player"]
 
     agent_type = move_data["agent"]
 
@@ -105,41 +104,35 @@ def make_move():
 
     if env_name == "connect4":
         board = board.reshape(env.board.shape)
-        action = board_index_to_col(action)
 
-    env.board = board
+    agent._env = env
 
-    next_board = env.next_state(board,action)
-    if env.is_win(next_board):
-        winner = env.check_winner(next_board)
-        next_board = board_to_json(next_board.flatten())
-        print("IS WIN Retuing win info")
-        print(type(next_board))
-        print(type(winner))
+    if env.is_win(board):
+        winner = env.check_winner(board)
+        next_board = board_to_json(board.flatten())
         return {"board": next_board, "winner":int(winner)}, 201
 
     if agent_type == "alphago":
         agent.reset()
         agent._act_max = True
 
-    print("Make Move")
+    env.current_player = env.check_turn(board)
+    print("Make Move!!!")
     print(board)
-    print(next_board)
-    print(agent_type)
-    env.current_player = env.check_turn(next_board)
-    env.board = next_board
-    a = agent.act(next_board)
+    env.board = board.copy()
+    print("Env board")
+    print(env.board)
+    a = agent.act(board)
     if type(a) == tuple:
         a,p_a = a
 
-    print("Action")
-    print(a)
-    print(type(env))
     curr_state, action, next_s, winner = env.step(a)
 
+    print("Next State")
+    print(next_s)
     next_board = board_to_json(next_s.flatten())
 
-    return {"board": next_board, "winner":winner} , 201
+    return {"board": next_board, "winner":int(winner)} , 201
 
 @app.route("/new_game",methods=["Post"])
 def new_game():
