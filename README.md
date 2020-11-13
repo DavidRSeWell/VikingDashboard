@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +69,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+=======
+# VikingDashboard
+This repository is for a dashboard that allows you to play various games vs an AlphaGoZero bot. Currently there is only tic-tac-toe and Connect4 available. This is just the front end to another repository ( https://github.com/befeltingu/VikingZero) 
+>>>>>>> 46c4eab72017c840af33753002c83a635a854643
