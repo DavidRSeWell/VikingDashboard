@@ -74,6 +74,7 @@ def alpha_opinion():
 
     return {"p":p.tolist(), "v": value_board, "mcts_p":p_a.tolist()}
 
+
 @app.route("/is_win",methods=["Post","Get"])
 def is_win():
     data = request.get_json()
@@ -86,6 +87,7 @@ def is_win():
     if win:
         print("Is WIN")
     return {"win":int(win)} ,201
+
 
 @app.route("/make_move",methods=["Post","Get"])
 def make_move():
