@@ -90,6 +90,7 @@ class Game extends React.Component {
       playAgent: true,
       agent: this.props.agent,
       game: this.props.game,
+      game_state: "Stop",
       board_probs: Array(props.action_size).fill(0),
       board_values: Array(props.action_size).fill(0),
       mcts_probs: Array(props.action_size).fill(0),
@@ -100,6 +101,29 @@ class Game extends React.Component {
     this.getNextState = this.getNextState.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.resetGame = this.resetGame.bind(this);
+
+  }
+
+  async calculateWinner() {
+    // Now call
+
+    const response = await fetch("/is_win", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({env_name: this.state.game, board: this.state.board})
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      this.setState({
+        winner: data["win"]
+      })
+
+    }
+
 
   }
 
@@ -122,6 +146,7 @@ class Game extends React.Component {
         board_probs: Array(props.action_size).fill(0),
         board_values: Array(props.action_size).fill(0),
         mcts_probs: Array(props.action_size).fill(0),
+        game_state: "Stop"
       };
     }
     return null;
@@ -185,76 +210,10 @@ class Game extends React.Component {
       console.log("NEXT STATE SET");
       this.setState({
         board: data["board"]
-      })
+      },this.make_move
 
-      if (this.state.playAgent) {
-
-        const agent = this.props.agent;
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const current_squares = current.squares.slice();
-        const env_name = this.state.game;
-
-        console.log("Agent Make Move!!!!!")
-        console.log(`agent type = ${agent}`)
-        // Now call
-        const response2 = await fetch("/make_move", {
-          method: 'POST',
-          headers: {
-                 'Content-Type': 'application/json'
-                 },
-          body: JSON.stringify({action: action, agent: agent, board: current_squares, player: 1, env_name: env_name})
-        });
-
-        const data = await response2.json()
-
-        if (response2.ok) {
-
-          console.log("Made move");
-          const history = this.state.history.slice(0, this.state.stepNumber + 1);
-
-          this.setState({
-            history: history.concat([{
-              squares: data.board,
-            }]),
-            board: data.board,
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-          })
-
-          this.calculateWinner(this.state.board)
-        }
-      }else{
-        this.calculateWinner(this.state.board)
-      }
-
-
-
+      )
     }
-  }
-
-  async calculateWinner(squares) {
-    // Now call
-    const response = await fetch("/is_win", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({env_name: this.state.game, board: squares})
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      this.setState({
-        winner: data["win"]
-      })
-
-      this.getAlphaOpinion(this.state.board);
-
-    }
-
-
   }
 
   async handleClick(i) {
@@ -269,6 +228,50 @@ class Game extends React.Component {
     console.log("New state")
     console.log(this.state.board);
 
+  }
+
+  async make_move() {
+    const board = this.state.board;
+    const agent = this.props.agent;
+    const env_name = this.state.game;
+
+    if (!this.state.playAgent){
+      return;
+    }
+
+    console.log("Agent Make Move!!!!!")
+    console.log(`agent type = ${agent}`)
+    console.log(`board = ${board}`)
+    console.log(`env = ${env_name}`)
+    // Now call
+    const response2 = await fetch("/make_move", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({agent: agent, board: board, env_name: env_name})
+    });
+
+    const data = await response2.json()
+
+    if (response2.ok) {
+
+      console.log("Made move");
+      const history = this.state.history.slice(0, this.state.stepNumber + 1);
+      console.log("New board")
+      console.log(data.board)
+      this.setState({
+        history: history.concat([{
+          squares: data.board,
+        }]),
+        board: data.board,
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext
+      },this.calculateWinner)
+
+      this.getAlphaOpinion(this.state.board);
+
+    }
   }
 
   playAgent() {
@@ -293,25 +296,40 @@ class Game extends React.Component {
         board: Array(this.state.board_num_squares).fill(null),
         stepNumber: 0,
         xIsNext: true,
-        winner: 0
+        winner: 0,
+        game_state: "Play"
       });
 
-      this.getAlphaOpinion(this.state.board);
+      console.log("REset game")
+      console.log(this.props.player);
+      if (this.props.player === "2"){
+        console.log("Make player 1 move");
+        this.make_move();
+
+      }else{
+        this.getAlphaOpinion(this.state.board);
+      }
 
     }
 
   }
 
   render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = this.state.winner;
+    console.log("Render Connect");
+    const game_state = this.state.game_state;
     const probs = this.state.board_probs;
     const mcts_probs = this.state.mcts_probs;
     const values = this.state.board_values;
+    const winner = this.state.winner;
 
     const game = this.state.game;
-    const player = this.props.player;
+    const player1 = this.props.player;
+    console.log(player1);
+    let player2 = "2"
+    if (player1 === "2"){
+      player2 = "1"
+    }
+    console.log(player2);
     const agent = this.props.agent;
 
     let status;
@@ -322,24 +340,32 @@ class Game extends React.Component {
       status = 'Next player:' + (this.state.xIsNext ? 'X' : 'O');
     }
 
-    return (
-      <Container>
-        <Row>
-          <Col>
-            <h1>Game</h1>
-            <h4>Player = {player}</h4>
-            <h4>Agent = {agent}</h4>
-            <h4>Game = {game}</h4>
-            <h4>{status}</h4>
-            <div className="game">
-              <div className="game-board">
-                <Board
+    let board;
+    if (game_state === "Play"){
+      board = <Board
                   height={this.props.board_height}
                   width={this.props.board_width}
                   squares={this.state.board}
                   onClick={(i) => this.handleClick(i)}
                 />
-              </div>
+
+    }else{
+      board = <p>Click New Game button to play</p>
+    }
+
+    return (
+      <Container>
+        <Row>
+          <Col>
+            <h1>Game</h1>
+            <h4>Player = {player1}</h4>
+            <h4>Agent = {player2}</h4>
+            <h4>{game}</h4>
+            <h4>{status}</h4>
+            <div className="game">
+              <div className="game-board">
+                {board}
+             </div>
             </div>
             <Button variant={"primary"} onClick={this.resetGame}>New Game</Button>
           </Col>
@@ -390,6 +416,5 @@ class Game extends React.Component {
 }
 
 // ========================================
-
 
 export default Game;
