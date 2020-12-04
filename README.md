@@ -15,7 +15,6 @@ Front End
 
 ```
 npm install
-
 ```
 
 ### RUN
@@ -30,7 +29,6 @@ Start Front end
 
 ```
 npm start
-
 ```
 
 ### Play
