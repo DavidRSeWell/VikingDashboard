@@ -7,10 +7,16 @@ import torch
 
 from flask import Flask, request
 from torch.autograd import Variable
+from webui import WebUI # Add WebUI to your imports
+from flask import Flask, render_template, request
 
-from .util import load_agent, load_all
+try:
+    from .util import load_agent, load_all
+except:
+    from util import load_agent, load_all
 
-app = Flask(__name__)
+app = Flask(__name__,static_folder='../build', static_url_path='/')
+ui = WebUI(app, debug=True) # Create a WebUI instance
 
 NAME = "AlphaGo"
 GAME = "tictactoe"
@@ -238,3 +244,6 @@ def create_json_tree(agent,node):
     node_num = 0
 
 
+if __name__ == "__main__":
+
+    app.run(debug=True)

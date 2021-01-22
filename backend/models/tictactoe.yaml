@@ -25,8 +25,8 @@ agent_config:
     output_size: 9
     optimizer: Adam
     player: 1
-    minimax_lookup_path: /Users/befeltingu/Documents/Github/VikingZeroDev/tests/minimax_state_actions.npy
-    state_lookup_path: /Users/befeltingu/Documents/Github/VikingZeroDev/tests/state_dict.npy
+    minimax_lookup_path:
+    state_lookup_path:
     t_threshold: 6
     weight_decay: 0
 
