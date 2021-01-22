@@ -28,17 +28,11 @@ grpcio==1.33.2
 gym==0.17.3
 idna==2.10
 importlib-metadata==2.0.0
-ipykernel==5.3.4
-ipython==7.19.0
-ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.17.2
 Jinja2==2.11.2
 json5==0.9.5
 jsonschema==3.2.0
-jupyter-client==6.1.7
-jupyter-core==4.6.3
-jupyterlab-pygments==0.1.2
 Keras-Preprocessing==1.1.2
 kiwisolver==1.3.1
 macholib==1.14
@@ -50,7 +44,6 @@ nbclient==0.5.1
 nbconvert==6.0.7
 nbformat==5.0.8
 nest-asyncio==1.4.2
-notebook==6.1.4
 numpy==1.19.5
 oauthlib==3.1.0
 opt-einsum==3.3.0
@@ -103,11 +96,9 @@ tqdm==4.51.0
 traitlets==5.0.5
 typing-extensions==3.7.4.3
 urllib3==1.25.11
-vikingzero @ file:///Users/davidsewell/Github/VikingZero/dist/VikingZero-0.1.2-py3-none-any.whl
+vikingzero
 wcwidth==0.2.5
 webencodings==0.5.1
-WebUI @ git+git://github.com/widdershin/flask-desktop.git@0b0cbb9b5df5d29c630e99fe0b50a0004440875c
 Werkzeug==1.0.1
-widgetsnbextension==3.5.1
 wrapt==1.12.1
 zipp==3.4.0
